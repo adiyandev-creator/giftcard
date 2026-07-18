@@ -1,6 +1,9 @@
 # IMEISTATION no-backend demo
 
 This folder is a self-contained professional testing demo for IMEISTATION/GiftVault. It does not require PHP, Node, MySQL, PostgreSQL, Composer, Prisma, Reloadly credentials, cPanel, or an installer.
+# GiftVault no-backend demo
+
+This folder is a self-contained testing demo for GiftVault. It does not require PHP, MySQL, Composer, Node, Reloadly credentials, cPanel, or an installer.
 
 ## Run it
 
@@ -47,3 +50,24 @@ Dashboard, Users, Roles, Permissions, Wallet Management, Deposits, Transactions,
 ## Data storage
 
 The demo stores all state in `localStorage` under `imeistation-demo-state`. Clear browser storage to reset the full demo state.
+Open:
+
+```text
+http://localhost:4173
+```
+
+## What you can test
+
+- Landing page navigation
+- Store product search
+- Gift card purchases using a seeded browser wallet
+- Delivered order/code history
+- Wallet top-up requests
+- Admin approval/rejection of wallet requests
+- Support ticket creation
+- Notifications
+- Responsive dark luxury UI
+
+## Data storage
+
+The demo stores all state in `localStorage` under `giftvault-demo-state`. Click **Reset demo** to restore the original seeded data.
