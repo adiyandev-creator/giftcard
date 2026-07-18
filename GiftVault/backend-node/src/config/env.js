@@ -1,0 +1,3 @@
+import dotenv from 'dotenv';
+dotenv.config();
+export const env={nodeEnv:process.env.NODE_ENV||'development',port:Number(process.env.PORT||8080),appUrl:process.env.APP_URL||'http://localhost:5173',databaseUrl:process.env.DATABASE_URL,jwtSecret:process.env.JWT_SECRET||'change-me',jwtExpiresIn:process.env.JWT_EXPIRES_IN||'7d',reloadly:{clientId:process.env.RELOADLY_CLIENT_ID||'',clientSecret:process.env.RELOADLY_CLIENT_SECRET||'',audience:process.env.RELOADLY_AUDIENCE||'https://giftcards.reloadly.com',baseUrl:process.env.RELOADLY_BASE_URL||'https://giftcards.reloadly.com'},uploadDir:process.env.UPLOAD_DIR||'uploads'};

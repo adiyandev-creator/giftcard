@@ -1,0 +1,3 @@
+import {prisma} from '../config/prisma.js';import {created,ok} from '../utils/response.js';
+export async function summary(req,res){const wallet=await prisma.wallet.findUnique({where:{userId:req.user.id}});const ledger=await prisma.walletLedger.findMany({where:{walletId:wallet.id},orderBy:{createdAt:'desc'},take:50});ok(res,{wallet,ledger})}
+export async function requestDeposit(req,res){const body=req.body;const wallet=await prisma.wallet.findUnique({where:{userId:req.user.id}});const deposit=await prisma.depositRequest.create({data:{walletId:wallet.id,userId:req.user.id,amount:body.amount,method:body.method,reference:body.reference,proofPath:req.file?.path,status:'PENDING'}});created(res,{deposit})}

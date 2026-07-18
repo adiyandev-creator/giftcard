@@ -1,0 +1,1 @@
+<?php require_once __DIR__.'/../../middleware/bootstrap.php';$d=input();$tok=bin2hex(random_bytes(24));$st=db()->prepare('update users set reset_token=?, reset_expires=date_add(now(), interval 1 hour) where email=?');$st->execute([$tok,clean($d['email']??'')]);out(['ok'=>true]);
