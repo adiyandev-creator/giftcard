@@ -1,0 +1,1 @@
+<?php require_once __DIR__.'/../../middleware/bootstrap.php';require_once __DIR__.'/../../reloadly/client.php';$u=user();if(($u['role_id']??0)<2)out(['error'=>'Forbidden'],403);$data=reloadly_get('/products');out(['synced'=>is_array($data),'raw_count'=>count($data['content']??$data??[])]);

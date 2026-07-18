@@ -1,0 +1,1 @@
+<?php require_once __DIR__.'/../../middleware/bootstrap.php';$u=user();$st=db()->prepare('select * from orders where id=? and user_id=?');$st->execute([$_GET['id']??0,$u['id']]);out(['order'=>$st->fetch()]);
