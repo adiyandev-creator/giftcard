@@ -1,0 +1,1 @@
+<?php require_once __DIR__.'/../../middleware/bootstrap.php';$d=input();$st=db()->prepare('update users set password_hash=?, reset_token=null where reset_token=? and reset_expires>now()');$st->execute([password_hash($d['password']??'',PASSWORD_DEFAULT),clean($d['token']??'')]);out(['ok'=>$st->rowCount()>0]);

@@ -1,0 +1,1 @@
+<?php require_once __DIR__.'/../../middleware/bootstrap.php';$a=user();if(($a['role_id']??0)<2)out(['error'=>'Forbidden'],403);$d=input();$st=db()->prepare('update wallet_requests set status="rejected",reviewed_by=?,reviewed_at=now(),admin_note=? where id=?');$st->execute([$a['id'],clean($d['reason']??''),$d['id']]);out(['ok'=>true]);
