@@ -1,0 +1,1 @@
+<?php require_once __DIR__.'/../../middleware/bootstrap.php';$u=user();$st=db()->prepare('select * from support_tickets where user_id=? order by id desc');$st->execute([$u['id']]);out(['tickets'=>$st->fetchAll()]);

@@ -1,0 +1,1 @@
+export default function Card({title,children,action}){return <section className="glass card"><div className="flex justify-between"><h2 className="text-xl font-bold">{title}</h2>{action}</div>{children}</section>}
