@@ -1,0 +1,1 @@
+<?php require_once __DIR__.'/../../middleware/bootstrap.php';$u=user();$st=db()->prepare('select * from wallets where user_id=?');$st->execute([$u['id']]);$tx=db()->prepare('select * from transactions where user_id=? order by id desc limit 50');$tx->execute([$u['id']]);out(['wallet'=>$st->fetch(),'transactions'=>$tx->fetchAll()]);

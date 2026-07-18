@@ -1,0 +1,1 @@
+<?php require_once __DIR__.'/../../middleware/bootstrap.php';$u=user();if(($u['role_id']??0)<2)out(['error'=>'Forbidden'],403);out(['users'=>db()->query('select count(*) c from users')->fetch()['c'],'orders'=>db()->query('select count(*) c from orders')->fetch()['c'],'revenue'=>db()->query('select coalesce(sum(total),0) c from orders')->fetch()['c']]);
