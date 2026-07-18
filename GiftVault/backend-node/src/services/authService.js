@@ -1,0 +1,4 @@
+import bcrypt from 'bcrypt';import jwt from 'jsonwebtoken';import {prisma} from '../config/prisma.js';import {env} from '../config/env.js';
+const sign=user=>jwt.sign({sub:user.id,role:user.roleId},env.jwtSecret,{expiresIn:env.jwtExpiresIn});
+export async function register({name,email,password}){const hash=await bcrypt.hash(password,12);const role=await prisma.role.findUnique({where:{key:'customer'}});const user=await prisma.user.create({data:{name,email,passwordHash:hash,roleId:role.id,wallet:{create:{currency:'USD'}}},include:{wallet:true}});return {token:sign(user),user}}
+export async function login({email,password}){const user=await prisma.user.findUnique({where:{email},include:{wallet:true}});if(!user||!await bcrypt.compare(password,user.passwordHash)){const err=new Error('Invalid credentials');err.status=401;err.publicMessage='Invalid credentials';throw err}return {token:sign(user),user}}

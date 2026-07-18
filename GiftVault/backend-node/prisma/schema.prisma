@@ -1,0 +1,394 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserType {
+  CUSTOMER
+  RESELLER
+  STAFF
+  OWNER
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+  PENDING_VERIFICATION
+}
+
+enum ProductStatus {
+  ACTIVE
+  DRAFT
+  ARCHIVED
+}
+
+enum OrderStatus {
+  PENDING
+  AWAITING_PAYMENT
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUNDED
+  EXPIRED
+}
+
+enum DepositStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  NEEDS_INFO
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  key         String           @unique
+  name        String
+  users       User[]
+  permissions RolePermission[]
+  createdAt   DateTime         @default(now())
+}
+
+model Permission {
+  id    String           @id @default(cuid())
+  key   String           @unique
+  name  String
+  roles RolePermission[]
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model User {
+  id              String           @id @default(cuid())
+  type            UserType         @default(CUSTOMER)
+  status          UserStatus       @default(ACTIVE)
+  roleId          String
+  name            String
+  email           String           @unique
+  passwordHash    String
+  emailVerifiedAt DateTime?
+  role            Role             @relation(fields: [roleId], references: [id])
+  wallet          Wallet?
+  orders          Order[]
+  deposits        DepositRequest[]
+  tickets         Ticket[]
+  apiKeys         ApiKey[]
+  sessions        Session[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([email, status])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String
+  ip        String?
+  userAgent String?
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  userId     String
+  name       String
+  keyHash    String
+  lastUsedAt DateTime?
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
+}
+
+model Wallet {
+  id             String           @id @default(cuid())
+  userId         String           @unique
+  currency       String           @default("USD")
+  currentBalance Decimal          @default(0)
+  pendingBalance Decimal          @default(0)
+  bonusBalance   Decimal          @default(0)
+  lockedBalance  Decimal          @default(0)
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ledger         WalletLedger[]
+  deposits       DepositRequest[]
+  updatedAt      DateTime         @updatedAt
+  createdAt      DateTime         @default(now())
+}
+
+model WalletLedger {
+  id           String   @id @default(cuid())
+  walletId     String
+  userId       String
+  type         String
+  amount       Decimal
+  balanceAfter Decimal
+  reference    String?
+  metadata     Json?
+  wallet       Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+
+  @@index([userId, type, createdAt])
+}
+
+model DepositRequest {
+  id           String        @id @default(cuid())
+  userId       String
+  walletId     String
+  amount       Decimal
+  method       String
+  reference    String?
+  proofPath    String?
+  status       DepositStatus @default(PENDING)
+  note         String?
+  reviewedById String?
+  reviewedAt   DateTime?
+  user         User          @relation(fields: [userId], references: [id])
+  wallet       Wallet        @relation(fields: [walletId], references: [id])
+  createdAt    DateTime      @default(now())
+
+  @@index([status, createdAt])
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  parentId  String?
+  products  Product[]
+  createdAt DateTime  @default(now())
+}
+
+model Brand {
+  id       String    @id @default(cuid())
+  name     String
+  slug     String    @unique
+  logoUrl  String?
+  products Product[]
+}
+
+model Supplier {
+  id       String    @id @default(cuid())
+  key      String    @unique
+  name     String
+  status   String    @default("ACTIVE")
+  config   Json?
+  products Product[]
+  orders   Order[]
+}
+
+model Product {
+  id                      String           @id @default(cuid())
+  name                    String
+  slug                    String           @unique
+  shortDescription        String?
+  description             String?
+  sku                     String           @unique
+  imageUrl                String?
+  gallery                 Json?
+  categoryId              String
+  brandId                 String
+  supplierId              String
+  productType             String
+  currency                String           @default("USD")
+  cost                    Decimal
+  price                   Decimal
+  markupPercent           Decimal          @default(0)
+  fixedMarkup             Decimal          @default(0)
+  resellerDiscountPercent Decimal          @default(0)
+  stock                   Int              @default(0)
+  deliveryType            String
+  tags                    String[]
+  seo                     Json?
+  metadata                Json?
+  customFields            Json?
+  featured                Boolean          @default(false)
+  popular                 Boolean          @default(false)
+  trending                Boolean          @default(false)
+  hidden                  Boolean          @default(false)
+  status                  ProductStatus    @default(ACTIVE)
+  category                Category         @relation(fields: [categoryId], references: [id])
+  brand                   Brand            @relation(fields: [brandId], references: [id])
+  supplier                Supplier         @relation(fields: [supplierId], references: [id])
+  variants                ProductVariant[]
+  orderItems              OrderItem[]
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime         @updatedAt
+
+  @@index([status, hidden, createdAt])
+  @@index([categoryId, brandId, supplierId])
+}
+
+model ProductVariant {
+  id        String  @id @default(cuid())
+  productId String
+  name      String
+  sku       String
+  price     Decimal
+  cost      Decimal
+  stock     Int     @default(0)
+  metadata  Json?
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id               String          @id @default(cuid())
+  orderNumber      String          @unique @default(cuid())
+  userId           String
+  supplierId       String?
+  status           OrderStatus     @default(PENDING)
+  currency         String
+  total            Decimal
+  cost             Decimal
+  profit           Decimal
+  tax              Decimal         @default(0)
+  discount         Decimal         @default(0)
+  couponCode       String?
+  supplierResponse Json?
+  user             User            @relation(fields: [userId], references: [id])
+  supplier         Supplier?       @relation(fields: [supplierId], references: [id])
+  items            OrderItem[]
+  timeline         OrderTimeline[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([userId, status, createdAt])
+}
+
+model OrderItem {
+  id             String       @id @default(cuid())
+  orderId        String
+  productId      String
+  name           String
+  quantity       Int
+  unitPrice      Decimal
+  total          Decimal
+  cost           Decimal
+  deliveryStatus String
+  order          Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product        Product      @relation(fields: [productId], references: [id])
+  digitalCode    DigitalCode?
+}
+
+model DigitalCode {
+  id          String    @id @default(cuid())
+  orderItemId String    @unique
+  code        String
+  pin         String?
+  barcode     String?
+  redeemUrl   String?
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+}
+
+model OrderTimeline {
+  id        String   @id @default(cuid())
+  orderId   String
+  event     String
+  message   String
+  metadata  Json?
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Ticket {
+  id         String          @id @default(cuid())
+  userId     String
+  subject    String
+  category   String?
+  priority   String          @default("NORMAL")
+  status     String          @default("OPEN")
+  assigneeId String?
+  user       User            @relation(fields: [userId], references: [id])
+  messages   TicketMessage[]
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+}
+
+model TicketMessage {
+  id          String   @id @default(cuid())
+  ticketId    String
+  userId      String?
+  body        String
+  internal    Boolean  @default(false)
+  attachments Json?
+  ticket      Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  channel   String
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+model Coupon {
+  id       String    @id @default(cuid())
+  code     String    @unique
+  type     String
+  value    Decimal
+  startsAt DateTime?
+  endsAt   DateTime?
+  active   Boolean   @default(true)
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  action    String
+  entity    String?
+  entityId  String?
+  ip        String?
+  payload   Json?
+  createdAt DateTime @default(now())
+
+  @@index([action, createdAt])
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
+
+model ApiLog {
+  id         String   @id @default(cuid())
+  path       String
+  method     String
+  status     Int
+  durationMs Int
+  createdAt  DateTime @default(now())
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model CronJob {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  lastRunAt DateTime?
+  status    String
+  metadata  Json?
+}
