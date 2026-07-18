@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GiftVault Demo Marketplace</title>
+  <meta name="description" content="GiftVault no-backend demo marketplace for testing UI, wallet, cart, orders, admin approval, support and notifications." />
+  <link rel="stylesheet" href="./assets/styles.css" />
+</head>
+<body>
+  <div class="aurora"></div>
+  <header class="topbar">
+    <a class="brand" href="#home" data-route="home"><span>GV</span> GiftVault Demo</a>
+    <nav>
+      <a href="#home" data-route="home">Home</a>
+      <a href="#store" data-route="store">Store</a>
+      <a href="#wallet" data-route="wallet">Wallet</a>
+      <a href="#orders" data-route="orders">Orders</a>
+      <a href="#support" data-route="support">Support</a>
+      <a href="#admin" data-route="admin">Admin</a>
+    </nav>
+    <button id="resetDemo" class="ghost">Reset demo</button>
+  </header>
+
+  <main id="app" class="container" aria-live="polite"></main>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <template id="product-card-template">
+    <article class="card product-card">
+      <div class="product-logo"></div>
+      <div>
+        <p class="eyebrow product-meta"></p>
+        <h3 class="product-title"></h3>
+        <p class="muted product-description"></p>
+      </div>
+      <div class="product-row">
+        <strong class="product-price"></strong>
+        <button class="btn buy-button">Buy</button>
+      </div>
+    </article>
+  </template>
+
+  <script src="./assets/app.js"></script>
+</body>
+</html>
